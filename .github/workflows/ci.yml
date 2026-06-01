@@ -52,16 +52,18 @@ jobs:
           ruff check .
           ruff format --check .
 
-      - name: Run tests with unittest and measure coverage
+      - name: Run tests with coverage
         run: |
-          coverage run -m unittest discover
-          coverage xml
-          coverage report
+          pytest tests \
+            --cov=build123d_ocp_preview \
+            --cov-report=term-missing \
+            --cov-report=xml
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+            - name: Upload coverage to Codecov
+              uses: codecov/codecov-action@v5
+              with:
+                token: ${{ secrets.CODECOV_TOKEN }}
+
 
   build:
     runs-on: ubuntu-latest
