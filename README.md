@@ -1,3 +1,5 @@
+[![codecov](https://codecov.io/gh/KarimAziev/build123d-ocp-preview/graph/badge.svg?token=8IL1WZN37H)](https://codecov.io/gh/KarimAziev/build123d-ocp-preview)
+
 # About
 
 This package provides a fast edit-preview workflow for `build123d` CAD projects, especially when working in editors like Emacs.
