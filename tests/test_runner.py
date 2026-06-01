@@ -23,21 +23,16 @@ def test_run_entries_uses_fresh_import_graph(tmp_path: Path) -> None:
     package = project / "pkg"
     package.mkdir(parents=True)
     (package / "__init__.py").write_text("", encoding="utf-8")
-    (package / "a.py").write_text(
-        "from pkg.b import value_from_b\n", encoding="utf-8"
-    )
+    (package / "a.py").write_text("from pkg.b import value_from_b\n", encoding="utf-8")
     (package / "b.py").write_text(
-        "from pkg.c import VALUE\n\n"
-        "def value_from_b() -> str:\n"
-        "    return VALUE\n",
+        "from pkg.c import VALUE\n\ndef value_from_b() -> str:\n    return VALUE\n",
         encoding="utf-8",
     )
     c_module = package / "c.py"
     c_module.write_text("VALUE = 'first'\n", encoding="utf-8")
     entry = project / "assembly.py"
     entry.write_text(
-        "from pkg.a import value_from_b\n"
-        "print(value_from_b())\n",
+        "from pkg.a import value_from_b\nprint(value_from_b())\n",
         encoding="utf-8",
     )
     config = AppConfig(
