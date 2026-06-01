@@ -16,7 +16,7 @@ Key behavior:
 **Table of Contents**
 
 > - [About](#about)
-> - [Installation](#installation)
+>   - [Installation](#installation)
 >   - [Quick Start](#quick-start)
 >   - [CLI](#cli)
 >   - [Config File](#config-file)
@@ -26,7 +26,7 @@ Key behavior:
 >   - [Current Limitations](#current-limitations)
 >   - [Development](#development)
 
-# Installation
+## Installation
 
 Install this tool into the same virtual environment as your CAD project:
 
