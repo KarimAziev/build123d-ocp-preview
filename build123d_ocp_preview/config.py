@@ -23,6 +23,7 @@ class AppConfig:
     initial_run: bool
     python_executable: Path
     ignored_paths: tuple[Path, ...] = ()
+    open_viewer: bool = True
 
 
 def load_project_config(config_file: Path) -> ProjectConfig:
@@ -51,6 +52,7 @@ def create_app_config(
     initial_run: bool,
     ignore_args: Sequence[str] = (),
     config_arg: str | None = None,
+    open_viewer: bool = True,
     python_executable: Path | None = None,
 ) -> AppConfig:
     project_dir = Path(project_arg or ".").expanduser().resolve()
@@ -95,6 +97,7 @@ def create_app_config(
         initial_run=initial_run,
         python_executable=python_executable or Path(sys.executable),
         ignored_paths=ignored_paths,
+        open_viewer=open_viewer,
     )
 
 

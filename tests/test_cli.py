@@ -14,6 +14,7 @@ def test_parse_args_uses_defaults(tmp_path: Path) -> None:
     assert config.port == 3939
     assert config.debounce_seconds == 0.25
     assert config.initial_run is True
+    assert config.open_viewer is True
 
 
 def test_parse_args_accepts_multiple_entries_and_options(tmp_path: Path) -> None:
@@ -64,6 +65,7 @@ def test_parse_args_accepts_short_aliases(tmp_path: Path) -> None:
             "-c",
             str(config_file),
             "-n",
+            "--no-open",
             "assembly.py",
         ]
     )
@@ -71,6 +73,7 @@ def test_parse_args_accepts_short_aliases(tmp_path: Path) -> None:
     assert config.port == 3942
     assert config.debounce_seconds == 0.15
     assert config.initial_run is False
+    assert config.open_viewer is False
     assert config.ignored_paths == (
         (tmp_path / "from_config.py").resolve(),
         (tmp_path / "from_cli.py").resolve(),

@@ -57,6 +57,12 @@ def parse_args(argv: Sequence[str] | None = None) -> AppConfig:
         action="store_true",
         help="Start watching without running entries immediately.",
     )
+    parser.add_argument(
+        "-b",
+        "--no-open",
+        action="store_true",
+        help="Do not open the browser viewer before the initial run.",
+    )
     args = parser.parse_args(argv)
     return create_app_config(
         project_arg=args.project,
@@ -66,6 +72,7 @@ def parse_args(argv: Sequence[str] | None = None) -> AppConfig:
         initial_run=not args.no_initial_run,
         ignore_args=args.ignore,
         config_arg=args.config,
+        open_viewer=not args.no_open,
     )
 
 
@@ -104,6 +111,16 @@ def run_app(config: AppConfig) -> int:
             flush=True,
         )
         viewer.start()
+        if config.open_viewer:
+            if viewer.wait_until_ready():
+                viewer.open_in_browser()
+                time.sleep(1.0)
+            else:
+                print(
+                    "[ocp123d] Viewer server did not become ready before initial run",
+                    file=sys.stderr,
+                    flush=True,
+                )
         if config.initial_run:
             print("[ocp123d] Running initial preview", flush=True)
             print_run_results(run_entries(config))

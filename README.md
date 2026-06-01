@@ -71,6 +71,11 @@ Open the viewer URL printed by `ocp_vscode`, usually:
 http://127.0.0.1:3939
 ```
 
+By default, `ocp123d` also opens this viewer page in your browser before the
+initial preview run. This gives `ocp_vscode` time to register the browser client,
+so the first model is loaded immediately instead of leaving the splash preview on
+screen.
+
 Now saving `assembly.py` or any project Python module such as
 `picar_cad/scratch.py` triggers a debounced re-run of `assembly.py`.
 
@@ -89,6 +94,7 @@ Options:
 -i, --ignore PATH         Project-relative Python file path to ignore. Repeatable.
 -c, --config PATH         TOML config file.
 -n, --no-initial-run      Start watching without running entries immediately.
+-b, --no-open             Do not open the browser viewer before the initial run.
 -h, --help                Show help.
 ```
 
@@ -98,6 +104,7 @@ Examples:
 ocp123d -p . assembly.py
 ocp123d -p . -o 3940 -d 500 assembly.py
 ocp123d -p . -i picar_cad/temp.py assembly.py
+ocp123d -p . --no-open assembly.py
 ocp123d -p . assembly.py second_preview.py
 ```
 

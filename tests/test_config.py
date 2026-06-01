@@ -25,6 +25,7 @@ def test_resolves_project_relative_entries(tmp_path: Path) -> None:
     assert config.debounce_seconds == 0.25
     assert config.initial_run is True
     assert config.ignored_paths == ()
+    assert config.open_viewer is True
 
 
 def test_resolves_cli_ignored_paths_relative_to_project(tmp_path: Path) -> None:
@@ -37,10 +38,12 @@ def test_resolves_cli_ignored_paths_relative_to_project(tmp_path: Path) -> None:
         port=3939,
         debounce_ms=250,
         initial_run=True,
+        open_viewer=False,
         ignore_args=["picar_cad/temp.py"],
     )
 
     assert config.ignored_paths == ((tmp_path / "picar_cad" / "temp.py").resolve(),)
+    assert config.open_viewer is False
 
 
 def test_load_project_config_reads_ignore_list(tmp_path: Path) -> None:
