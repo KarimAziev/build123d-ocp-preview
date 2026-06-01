@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools", "setuptools_scm", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+exclude = ["tests*", "test*"]
+
+[tool.setuptools_scm]
+version_scheme = "guess-next-dev"
+local_scheme = "dirty-tag"
+write_to = "build123d_ocp_preview/version.py"
+
+[project]
+name = "build123d_ocp_preview"
+description = "Preview Build123d projects in the browser with ocp_vscode."
+readme = { file = "README.md", content-type = "text/markdown" }
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+authors = [
+    { name = "Karim Aziiev", email = "karim.aziiev@gmail.com" }
+]
+dependencies = [
+    "build123d",
+    "ocp_vscode>=3.0.0",
+    "watchdog",
+]
+keywords = ["build123d", "cad"]
+dynamic = ["version"]
+requires-python = ">=3.10,<3.15"
+
+[project.scripts]
+ocp123d = "build123d_ocp_preview.cli:main"
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+extend-exclude = ["build123d_ocp_preview/version.py"]
+
+[tool.ruff.lint]
+select = ["E", "F"]
+ignore = ["E501", "E731", "E402"]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pyright",
+    "ruff",
+    "pre-commit",
+]
