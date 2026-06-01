@@ -20,7 +20,6 @@ authors = [
     { name = "Karim Aziiev", email = "karim.aziiev@gmail.com" }
 ]
 dependencies = [
-    "build123d",
     "ocp_vscode>=3.0.0",
     "watchdog",
 ]
@@ -41,6 +40,9 @@ select = ["E", "F"]
 ignore = ["E501", "E731", "E402"]
 
 [project.optional-dependencies]
+build123d = [
+    "build123d",
+]
 dev = [
     "pytest",
     "pyright",
