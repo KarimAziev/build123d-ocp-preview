@@ -44,22 +44,22 @@ jobs:
           python -m venv .venv
           echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
           .venv/bin/python -m pip install --upgrade pip
-          .venv/bin/python -m pip install ".[dev,build123d]" pytest-cov
+          .venv/bin/python -m pip install -e ".[dev,build123d]" pytest-cov
 
       - name: Install Pyright
         run: npm install -g pyright
 
       - name: Run Pyright static type checker
-        run: pyright ./build123d_ocp_preview ./tests/
+        run: pyright --pythonpath .venv/bin/python ./build123d_ocp_preview ./tests/
 
       - name: Lint code
         run: |
-          ruff check .
-          ruff format --check .
+          .venv/bin/python -m ruff check .
+          .venv/bin/python -m ruff format --check .
 
       - name: Run tests with coverage
         run: |
-          pytest tests \
+          .venv/bin/python -m pytest tests \
             --cov=build123d_ocp_preview \
             --cov-report=term-missing \
             --cov-report=xml
