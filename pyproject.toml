@@ -35,6 +35,9 @@ line-length = 88
 target-version = "py311"
 extend-exclude = ["build123d_ocp_preview/version.py"]
 
+[tool.ruff.format]
+quote-style = "double"
+
 [tool.ruff.lint]
 select = ["E", "F"]
 ignore = ["E501", "E731", "E402"]

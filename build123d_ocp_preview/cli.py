@@ -49,7 +49,7 @@ def parse_args(argv: Sequence[str] | None = None) -> AppConfig:
         "-c",
         "--config",
         default=None,
-        help="TOML config file containing ignore = [\"path.py\", ...].",
+        help='TOML config file containing ignore = ["path.py", ...].',
     )
     parser.add_argument(
         "-n",
