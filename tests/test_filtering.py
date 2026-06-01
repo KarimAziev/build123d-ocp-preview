@@ -40,3 +40,16 @@ def test_ignores_path_outside_project(tmp_path: Path) -> None:
     outside.write_text("VALUE = 1\n", encoding="utf-8")
 
     assert should_handle_path(project, outside) is False
+
+
+def test_ignores_configured_exact_paths(tmp_path: Path) -> None:
+    project = tmp_path / "project"
+    project.mkdir()
+    ignored = project / "picar_cad" / "temp.py"
+    watched = project / "picar_cad" / "scratch.py"
+    ignored.parent.mkdir()
+    ignored.write_text("VALUE = 1\n", encoding="utf-8")
+    watched.write_text("VALUE = 1\n", encoding="utf-8")
+
+    assert should_handle_path(project, ignored, ignored_paths=(ignored,)) is False
+    assert should_handle_path(project, watched, ignored_paths=(ignored,)) is True

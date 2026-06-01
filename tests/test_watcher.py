@@ -46,3 +46,16 @@ def test_handler_uses_move_destination(tmp_path: Path) -> None:
     handler.on_moved(FileMovedEvent(str(project / "old.py"), str(module)))
 
     assert paths == [module]
+
+
+def test_handler_ignores_configured_paths(tmp_path: Path) -> None:
+    paths: list[Path] = []
+    project = tmp_path / "project"
+    project.mkdir()
+    module = project / "ignored.py"
+    module.write_text("VALUE = 1\n", encoding="utf-8")
+    handler = ProjectEventHandler(project, paths.append, ignored_paths=(module,))
+
+    handler.on_modified(FileModifiedEvent(str(module)))
+
+    assert paths == []

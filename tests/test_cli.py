@@ -30,6 +30,8 @@ def test_parse_args_accepts_multiple_entries_and_options(tmp_path: Path) -> None
             "3941",
             "--debounce-ms",
             "100",
+            "--ignore",
+            "ignored.py",
             "--no-initial-run",
             "assembly.py",
             "other.py",
@@ -40,3 +42,36 @@ def test_parse_args_accepts_multiple_entries_and_options(tmp_path: Path) -> None
     assert config.port == 3941
     assert config.debounce_seconds == 0.1
     assert config.initial_run is False
+    assert config.ignored_paths == ((tmp_path / "ignored.py").resolve(),)
+
+
+def test_parse_args_accepts_short_aliases(tmp_path: Path) -> None:
+    entry = tmp_path / "assembly.py"
+    entry.write_text("print('ok')\n", encoding="utf-8")
+    config_file = tmp_path / "ocp123d.toml"
+    config_file.write_text('ignore = ["from_config.py"]\n', encoding="utf-8")
+
+    config = parse_args(
+        [
+            "-p",
+            str(tmp_path),
+            "-o",
+            "3942",
+            "-d",
+            "150",
+            "-i",
+            "from_cli.py",
+            "-c",
+            str(config_file),
+            "-n",
+            "assembly.py",
+        ]
+    )
+
+    assert config.port == 3942
+    assert config.debounce_seconds == 0.15
+    assert config.initial_run is False
+    assert config.ignored_paths == (
+        (tmp_path / "from_config.py").resolve(),
+        (tmp_path / "from_cli.py").resolve(),
+    )
