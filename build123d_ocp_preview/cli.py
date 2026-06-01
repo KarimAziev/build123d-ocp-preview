@@ -1,0 +1,109 @@
+import argparse
+import sys
+import time
+from collections.abc import Sequence
+from pathlib import Path
+
+from watchdog.observers import Observer
+
+from build123d_ocp_preview.config import AppConfig, create_app_config
+from build123d_ocp_preview.reloader import DebouncedReloader
+from build123d_ocp_preview.runner import RunResult, run_entries
+from build123d_ocp_preview.viewer import ViewerProcess
+from build123d_ocp_preview.watcher import ProjectEventHandler
+
+
+def parse_args(argv: Sequence[str] | None = None) -> AppConfig:
+    parser = argparse.ArgumentParser(
+        description="Preview build123d scripts in ocp_vscode with hot reload."
+    )
+    parser.add_argument("entries", nargs="+", help="Entry Python file(s) to run.")
+    parser.add_argument(
+        "--project",
+        default=None,
+        help="Project directory to watch. Defaults to the current directory.",
+    )
+    parser.add_argument("--port", type=int, default=3939, help="ocp_vscode port.")
+    parser.add_argument(
+        "--debounce-ms",
+        type=int,
+        default=250,
+        help="Debounce window for file changes in milliseconds.",
+    )
+    parser.add_argument(
+        "--no-initial-run",
+        action="store_true",
+        help="Start watching without running entries immediately.",
+    )
+    args = parser.parse_args(argv)
+    return create_app_config(
+        project_arg=args.project,
+        entry_args=args.entries,
+        port=args.port,
+        debounce_ms=args.debounce_ms,
+        initial_run=not args.no_initial_run,
+    )
+
+
+def print_run_results(results: Sequence[RunResult]) -> None:
+    for result in results:
+        print(
+            f"[ocp123d] Finished {result.entry} with exit {result.returncode}",
+            flush=True,
+        )
+        if result.stdout:
+            print(result.stdout, end="", flush=True)
+        if result.stderr:
+            print(result.stderr, end="", file=sys.stderr, flush=True)
+
+
+def run_app(config: AppConfig) -> int:
+    viewer = ViewerProcess(config.port)
+    observer = Observer()
+    observer_started = False
+
+    def run_reload(paths: tuple[Path, ...]) -> None:
+        changed = ", ".join(str(path) for path in paths)
+        print(f"[ocp123d] Reload triggered by: {changed}", flush=True)
+        print_run_results(run_entries(config))
+
+    reloader = DebouncedReloader(config.debounce_seconds, run_reload)
+    handler = ProjectEventHandler(config.project_dir, reloader.request_reload)
+
+    try:
+        print(
+            f"[ocp123d] Starting ocp_vscode on http://127.0.0.1:{config.port}",
+            flush=True,
+        )
+        viewer.start()
+        if config.initial_run:
+            print("[ocp123d] Running initial preview", flush=True)
+        print_run_results(run_entries(config))
+        observer.schedule(handler, str(config.project_dir), recursive=True)
+        observer.start()
+        observer_started = True
+        print(f"[ocp123d] Watching {config.project_dir}", flush=True)
+        while observer.is_alive():
+            time.sleep(0.2)
+    except KeyboardInterrupt:
+        print("\n[ocp123d] Stopping", flush=True)
+    finally:
+        reloader.close()
+        if observer_started:
+            observer.stop()
+            observer.join(timeout=5)
+        viewer.stop()
+    return 0
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    try:
+        config = parse_args(argv)
+    except ValueError as exc:
+        print(f"ocp123d: {exc}", file=sys.stderr, flush=True)
+        return 2
+    return run_app(config)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
