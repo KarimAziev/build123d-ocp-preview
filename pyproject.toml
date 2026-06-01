@@ -45,7 +45,6 @@ build123d = [
 ]
 dev = [
     "pytest",
-    "pyright",
     "ruff",
     "pre-commit",
 ]
