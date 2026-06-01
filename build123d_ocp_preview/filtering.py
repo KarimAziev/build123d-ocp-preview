@@ -14,7 +14,11 @@ IGNORED_DIR_NAMES: frozenset[str] = frozenset(
 )
 
 
-def should_handle_path(project_dir: Path, path: Path) -> bool:
+def should_handle_path(
+    project_dir: Path,
+    path: Path,
+    ignored_paths: tuple[Path, ...] = (),
+) -> bool:
     resolved_project = project_dir.resolve()
     resolved_path = path.resolve()
     try:
@@ -23,6 +27,8 @@ def should_handle_path(project_dir: Path, path: Path) -> bool:
         return False
 
     if resolved_path.suffix != ".py":
+        return False
+    if resolved_path in {ignored_path.resolve() for ignored_path in ignored_paths}:
         return False
 
     return not any(part in IGNORED_DIR_NAMES for part in relative_path.parts)

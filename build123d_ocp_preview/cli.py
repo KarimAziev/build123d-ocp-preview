@@ -19,18 +19,40 @@ def parse_args(argv: Sequence[str] | None = None) -> AppConfig:
     )
     parser.add_argument("entries", nargs="+", help="Entry Python file(s) to run.")
     parser.add_argument(
+        "-p",
         "--project",
         default=None,
         help="Project directory to watch. Defaults to the current directory.",
     )
-    parser.add_argument("--port", type=int, default=3939, help="ocp_vscode port.")
     parser.add_argument(
+        "-o",
+        "--port",
+        type=int,
+        default=3939,
+        help="ocp_vscode port.",
+    )
+    parser.add_argument(
+        "-d",
         "--debounce-ms",
         type=int,
         default=250,
         help="Debounce window for file changes in milliseconds.",
     )
     parser.add_argument(
+        "-i",
+        "--ignore",
+        action="append",
+        default=[],
+        help="Project-relative Python file path to ignore. Can be repeated.",
+    )
+    parser.add_argument(
+        "-c",
+        "--config",
+        default=None,
+        help="TOML config file containing ignore = [\"path.py\", ...].",
+    )
+    parser.add_argument(
+        "-n",
         "--no-initial-run",
         action="store_true",
         help="Start watching without running entries immediately.",
@@ -42,6 +64,8 @@ def parse_args(argv: Sequence[str] | None = None) -> AppConfig:
         port=args.port,
         debounce_ms=args.debounce_ms,
         initial_run=not args.no_initial_run,
+        ignore_args=args.ignore,
+        config_arg=args.config,
     )
 
 
@@ -68,7 +92,11 @@ def run_app(config: AppConfig) -> int:
         print_run_results(run_entries(config))
 
     reloader = DebouncedReloader(config.debounce_seconds, run_reload)
-    handler = ProjectEventHandler(config.project_dir, reloader.request_reload)
+    handler = ProjectEventHandler(
+        config.project_dir,
+        reloader.request_reload,
+        ignored_paths=config.ignored_paths,
+    )
 
     try:
         print(
@@ -78,7 +106,7 @@ def run_app(config: AppConfig) -> int:
         viewer.start()
         if config.initial_run:
             print("[ocp123d] Running initial preview", flush=True)
-        print_run_results(run_entries(config))
+            print_run_results(run_entries(config))
         observer.schedule(handler, str(config.project_dir), recursive=True)
         observer.start()
         observer_started = True

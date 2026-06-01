@@ -12,9 +12,15 @@ PathCallback = Callable[[Path], None]
 
 
 class ProjectEventHandler(FileSystemEventHandler):
-    def __init__(self, project_dir: Path, callback: PathCallback) -> None:
+    def __init__(
+        self,
+        project_dir: Path,
+        callback: PathCallback,
+        ignored_paths: tuple[Path, ...] = (),
+    ) -> None:
         self._project_dir = project_dir
         self._callback = callback
+        self._ignored_paths = ignored_paths
 
     def on_created(self, event: FileSystemEvent) -> None:
         self._handle_event(event)
@@ -41,5 +47,5 @@ class ProjectEventHandler(FileSystemEventHandler):
         self._handle_path(Path(event.src_path))
 
     def _handle_path(self, path: Path) -> None:
-        if should_handle_path(self._project_dir, path):
+        if should_handle_path(self._project_dir, path, self._ignored_paths):
             self._callback(path)
