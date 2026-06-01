@@ -6,13 +6,6 @@ from pathlib import Path
 
 from build123d_ocp_preview.config import AppConfig
 
-RUNNER_CODE = (
-    "import runpy, sys; "
-    "from ocp_vscode import set_port; "
-    "set_port(int(sys.argv[1])); "
-    "runpy.run_path(sys.argv[2], run_name='__main__')"
-)
-
 
 @dataclass(frozen=True)
 class RunResult:
@@ -45,8 +38,8 @@ def build_entry_command(
 ) -> list[str]:
     return [
         str(python_executable),
-        "-c",
-        RUNNER_CODE,
+        "-m",
+        "build123d_ocp_preview.runner_child",
         str(port),
         str(entry),
     ]

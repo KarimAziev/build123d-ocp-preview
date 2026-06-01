@@ -22,6 +22,7 @@ authors = [
 dependencies = [
     "ocp_vscode>=3.0.0",
     "tomli; python_version < '3.11'",
+    "typing_extensions; python_version < '3.11'",
     "watchdog",
 ]
 keywords = ["build123d", "cad"]

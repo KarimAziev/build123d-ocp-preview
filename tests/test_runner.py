@@ -3,7 +3,11 @@ import sys
 from pathlib import Path
 
 from build123d_ocp_preview.config import AppConfig
-from build123d_ocp_preview.runner import build_child_environment, run_entries
+from build123d_ocp_preview.runner import (
+    build_child_environment,
+    build_entry_command,
+    run_entries,
+)
 
 
 def test_build_child_environment_prepends_project_pythonpath(tmp_path: Path) -> None:
@@ -52,3 +56,15 @@ def test_run_entries_uses_fresh_import_graph(tmp_path: Path) -> None:
     assert "first" in first[0].stdout
     assert second[0].returncode == 0
     assert "second" in second[0].stdout
+
+
+def test_build_entry_command_uses_runner_child_module(tmp_path: Path) -> None:
+    entry = tmp_path / "assembly.py"
+
+    assert build_entry_command(Path("/python"), 3940, entry) == [
+        "/python",
+        "-m",
+        "build123d_ocp_preview.runner_child",
+        "3940",
+        str(entry),
+    ]
