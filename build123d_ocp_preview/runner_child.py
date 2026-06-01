@@ -11,7 +11,7 @@ def install_typing_compat() -> None:
     if not hasattr(typing, "NotRequired"):
         from typing_extensions import NotRequired
 
-        typing.NotRequired = NotRequired
+        setattr(typing, "NotRequired", NotRequired)
 
 
 def main() -> int:
