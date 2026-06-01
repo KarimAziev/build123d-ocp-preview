@@ -1,3 +1,4 @@
+[![PyPI](https://img.shields.io/pypi/v/build123d-ocp-preview)](https://pypi.org/project/build123d-ocp-preview/)
 [![codecov](https://codecov.io/gh/KarimAziev/build123d-ocp-preview/graph/badge.svg?token=8IL1WZN37H)](https://codecov.io/gh/KarimAziev/build123d-ocp-preview)
 
 # About
