@@ -1,6 +1,11 @@
 from pathlib import Path
+import threading
 
-from build123d_ocp_preview.cli import parse_args
+from build123d_ocp_preview.cli import (
+    VIEWER_CONNECTED_PATH,
+    parse_args,
+    request_reload_for_viewer_registration,
+)
 
 
 def test_parse_args_uses_defaults(tmp_path: Path) -> None:
@@ -78,3 +83,20 @@ def test_parse_args_accepts_short_aliases(tmp_path: Path) -> None:
         (tmp_path / "from_config.py").resolve(),
         (tmp_path / "from_cli.py").resolve(),
     )
+
+
+def test_viewer_registration_reload_waits_for_initial_preview() -> None:
+    initial_preview_done = threading.Event()
+    requested_paths: list[Path] = []
+
+    request_reload_for_viewer_registration(
+        initial_preview_done,
+        requested_paths.append,
+    )
+    initial_preview_done.set()
+    request_reload_for_viewer_registration(
+        initial_preview_done,
+        requested_paths.append,
+    )
+
+    assert requested_paths == [VIEWER_CONNECTED_PATH]

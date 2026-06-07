@@ -10,8 +10,10 @@ The `ocp123d` command starts a single long-lived `ocp_vscode` viewer server, wat
 Key behavior:
 
 - starts the viewer server once and keeps it running
+- cleans up a previously recorded viewer process on the same port
 - watches the entire project recursively
 - reloads when indirectly imported Python modules change
+- re-runs the preview when a new browser viewer tab registers
 - avoids stale imports by running each reload in a fresh child process
 
 **Table of Contents**
@@ -68,10 +70,10 @@ source .venv/bin/activate
 ocp123d -p . assembly.py
 ```
 
-Open the viewer URL printed by `ocp_vscode`, usually:
+Open the viewer URL printed by `ocp123d`, usually:
 
 ```text
-http://127.0.0.1:3939
+http://127.0.0.1:3939/viewer
 ```
 
 By default, `ocp123d` also opens this viewer page in your browser before the
@@ -81,6 +83,11 @@ screen.
 
 Now saving `assembly.py` or any project Python module such as
 `picar_cad/scratch.py` triggers a debounced re-run of `assembly.py`.
+
+If you open the viewer in a new browser tab later, `ocp123d` detects the new
+browser client registration and triggers another debounced preview run. This
+works around `ocp_vscode` initializing fresh browser clients with its built-in
+logo scene.
 
 ## CLI
 
@@ -185,6 +192,12 @@ from a previous run do not survive.
 
 The tradeoff is that heavy CAD scripts pay their normal script execution cost on
 each reload. The viewer server itself stays running.
+
+`ocp123d` records the `ocp_vscode` process ID it started in a temporary state
+file. On the next launch for the same port, it removes dead PID files and only
+terminates a still-running process if the recorded command line is identifiable
+as `ocp_vscode` for that port. It deliberately does not kill arbitrary processes
+that happen to use the same port.
 
 ## Current Limitations
 

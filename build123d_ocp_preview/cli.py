@@ -1,6 +1,8 @@
 import argparse
 import sys
+import threading
 import time
+from collections.abc import Callable
 from collections.abc import Sequence
 from pathlib import Path
 
@@ -11,6 +13,16 @@ from build123d_ocp_preview.reloader import DebouncedReloader
 from build123d_ocp_preview.runner import RunResult, run_entries
 from build123d_ocp_preview.viewer import ViewerProcess
 from build123d_ocp_preview.watcher import ProjectEventHandler
+
+VIEWER_CONNECTED_PATH = Path("<viewer-connected>")
+
+
+def request_reload_for_viewer_registration(
+    initial_preview_done: threading.Event,
+    request_reload: Callable[[Path], None],
+) -> None:
+    if initial_preview_done.is_set():
+        request_reload(VIEWER_CONNECTED_PATH)
 
 
 def parse_args(argv: Sequence[str] | None = None) -> AppConfig:
@@ -89,9 +101,9 @@ def print_run_results(results: Sequence[RunResult]) -> None:
 
 
 def run_app(config: AppConfig) -> int:
-    viewer = ViewerProcess(config.port)
     observer = Observer()
     observer_started = False
+    initial_preview_done = threading.Event()
 
     def run_reload(paths: tuple[Path, ...]) -> None:
         changed = ", ".join(str(path) for path in paths)
@@ -99,6 +111,13 @@ def run_app(config: AppConfig) -> int:
         print_run_results(run_entries(config))
 
     reloader = DebouncedReloader(config.debounce_seconds, run_reload)
+    viewer = ViewerProcess(
+        config.port,
+        on_browser_registered=lambda: request_reload_for_viewer_registration(
+            initial_preview_done,
+            reloader.request_reload,
+        ),
+    )
     handler = ProjectEventHandler(
         config.project_dir,
         reloader.request_reload,
@@ -124,6 +143,7 @@ def run_app(config: AppConfig) -> int:
         if config.initial_run:
             print("[ocp123d] Running initial preview", flush=True)
             print_run_results(run_entries(config))
+        initial_preview_done.set()
         observer.schedule(handler, str(config.project_dir), recursive=True)
         observer.start()
         observer_started = True
